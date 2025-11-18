@@ -1,0 +1,44 @@
+name: Auto-Generate EPG.xml
+
+on:
+  workflow_dispatch:  # Allows you to run it manually
+  schedule:
+    - cron: '0 */6 * * *' # Runs every 6 hours
+
+jobs:
+  build-epg:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checks out your public repo
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. Sets up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. Installs 'requests' from your requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. *** THE MAGIC STEP ***
+      # Creates the .py file from your secret
+      - name: Load Python script from Secret
+        run: echo "${{ secrets.PYTHON_SCRIPT }}" > generate_xmltv.py
+
+      # 5. Runs the .py file (which is NOT in your repo)
+      - name: Run EPG generator script
+        run: python generate_xmltv.py
+
+      # 6. Saves ONLY the epg.xml file to your public repo
+      - name: Commit and push if there are changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automated EPG update"
+          file_pattern: epg.xml # Only commits this one file
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"

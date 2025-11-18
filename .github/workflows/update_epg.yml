@@ -8,6 +8,12 @@ on:
 jobs:
   build-epg:
     runs-on: ubuntu-latest
+    
+    # --- FIX for 403 Permission Denied error ---
+    permissions:
+      contents: write
+    # ------------------------------------------
+
     steps:
       # 1. Checks out your public repo so it can access channels.json
       - name: Check out repository
@@ -25,8 +31,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. *** THIS IS THE NEW, FIXED STEP ***
-      #    Loads your secret script into a file
+      # 4. --- FIX for Syntax Error ---
+      #    Loads your secret script from secrets.PYTHON_SCRIPT
       - name: Load Python script from Secret
         run: |
           cat << 'END_OF_SCRIPT' > generate_xmltv.py
